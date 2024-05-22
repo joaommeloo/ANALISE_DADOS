@@ -1,0 +1,39 @@
+import pandas as pd
+
+caminho_arquivo = r'R:\Servicos\Operações Maxpar\PLANEJAMENTO\MAXPAR\Continuidade Operacional\06. Equipe\Joao Melo\BASE_MONITORIA.xlsx'
+
+df = pd.read_excel(caminho_arquivo)
+
+colunas_para_excluir = ["Usuário Windws", "Horário de entrada", "Nome Grupo de Agente", "Inicio Férias", "Final Férias", 
+                        "Tempo de casa", "Data de Admissão", "PCD", "Alocação", "Matrícula (Beckup)", 
+                        "Login do Agente (Beckup)", "Cód Sistema (Beckup)", "Equipe Anterior", "Data alteração",
+                        "Horário de saída", "Carga horária", "Data alteração",]
+
+df = df.drop(columns=colunas_para_excluir)
+
+df_filtrado = df[df["Agente ativo?"] == "Sim"]
+
+df_filtrado = df_filtrado[df_filtrado["Equipe"] != "Colômbia"]
+
+
+monitores = ["Gustavo Fontana", "Clara Silva", "Ana Ortolan", "Elaine Simoes"]
+
+
+equipes_unicas = df_filtrado["Equipe"].unique()
+
+for equipe in equipes_unicas:
+    indices_equipe = df_filtrado[df_filtrado["Equipe"] == equipe].index
+    n_indices = len(indices_equipe)
+    n_monitores_por_equipe = len(monitores)
+    n_linhas_por_monitor = n_indices // n_monitores_por_equipe
+    n_linhas_extras = n_indices % n_monitores_por_equipe
+    
+    monitor_idx = 0
+    for i, monitor in enumerate(monitores):
+        n_linhas = n_linhas_por_monitor + (1 if i < n_linhas_extras else 0)
+        start_idx = monitor_idx
+        end_idx = start_idx + n_linhas
+        df_filtrado.loc[indices_equipe[start_idx:end_idx], "Monitor"] = monitor
+        monitor_idx = end_idx
+
+display(df_filtrado)
